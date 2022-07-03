@@ -35,7 +35,7 @@
  *
  * Advanced settings can be found in Configuration_adv.h
  */
-#define CONFIGURATION_H_VERSION 02000903
+#define CONFIGURATION_H_VERSION 02000904
 
 //===========================================================================
 //============================= Getting Started =============================
@@ -150,20 +150,40 @@
 //#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
 /**
- * Define the number of coordinated linear axes.
- * See https://github.com/DerAndere1/Marlin/wiki
- * Each linear axis gets its own stepper control and endstop:
+ * Stepper Drivers
  *
- *   Steppers: *_STEP_PIN, *_ENABLE_PIN, *_DIR_PIN, *_ENABLE_ON
- *   Endstops: *_STOP_PIN, USE_*MIN_PLUG, USE_*MAX_PLUG
- *       Axes: *_MIN_POS, *_MAX_POS, INVERT_*_DIR
- *    Planner: DEFAULT_AXIS_STEPS_PER_UNIT, DEFAULT_MAX_FEEDRATE
- *             DEFAULT_MAX_ACCELERATION, AXIS_RELATIVE_MODES,
- *             MICROSTEP_MODES, MANUAL_FEEDRATE
+ * These settings allow Marlin to tune stepper driver timing and enable advanced options for
+ * stepper drivers that support them. You may also override timing options in Configuration_adv.h.
  *
- * :[3, 4, 5, 6]
+ * Use TMC2208/TMC2208_STANDALONE for TMC2225 drivers and TMC2209/TMC2209_STANDALONE for TMC2226 drivers.
+ *
+ * Options: A4988, A5984, DRV8825, LV8729, L6470, L6474, POWERSTEP01,
+ *          TB6560, TB6600, TMC2100,
+ *          TMC2130, TMC2130_STANDALONE, TMC2160, TMC2160_STANDALONE,
+ *          TMC2208, TMC2208_STANDALONE, TMC2209, TMC2209_STANDALONE,
+ *          TMC26X,  TMC26X_STANDALONE,  TMC2660, TMC2660_STANDALONE,
+ *          TMC5130, TMC5130_STANDALONE, TMC5160, TMC5160_STANDALONE
+ * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'L6470', 'L6474', 'POWERSTEP01', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2160', 'TMC2160_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC2209', 'TMC2209_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE', 'TMC5160', 'TMC5160_STANDALONE']
  */
-//#define LINEAR_AXES 3
+#define X_DRIVER_TYPE  TMC2208_STANDALONE
+#define Y_DRIVER_TYPE  TMC2208_STANDALONE
+#define Z_DRIVER_TYPE  TMC2208_STANDALONE
+//#define X2_DRIVER_TYPE A4988
+//#define Y2_DRIVER_TYPE A4988
+//#define Z2_DRIVER_TYPE A4988
+//#define Z3_DRIVER_TYPE A4988
+//#define Z4_DRIVER_TYPE A4988
+//#define I_DRIVER_TYPE  A4988
+//#define J_DRIVER_TYPE  A4988
+//#define K_DRIVER_TYPE  A4988
+#define E0_DRIVER_TYPE TMC2208_STANDALONE
+//#define E1_DRIVER_TYPE A4988
+//#define E2_DRIVER_TYPE A4988
+//#define E3_DRIVER_TYPE A4988
+//#define E4_DRIVER_TYPE A4988
+//#define E5_DRIVER_TYPE A4988
+//#define E6_DRIVER_TYPE A4988
+//#define E7_DRIVER_TYPE A4988
 
 /**
  * Axis codes for additional axes:
@@ -178,14 +198,16 @@
  * Regardless of the settings, firmware-internal axis IDs are
  * I (AXIS4), J (AXIS5), K (AXIS6).
  */
-#if LINEAR_AXES >= 4
+#ifdef I_DRIVER_TYPE
   #define AXIS4_NAME 'A' // :['A', 'B', 'C', 'U', 'V', 'W']
 #endif
-#if LINEAR_AXES >= 5
-  #define AXIS5_NAME 'B' // :['A', 'B', 'C', 'U', 'V', 'W']
+#ifdef J_DRIVER_TYPE
+  #define AXIS5_NAME 'B' // :['B', 'C', 'U', 'V', 'W']
+  #define AXIS5_ROTATES
 #endif
-#if LINEAR_AXES >= 6
-  #define AXIS6_NAME 'C' // :['A', 'B', 'C', 'U', 'V', 'W']
+#ifdef K_DRIVER_TYPE
+  #define AXIS6_NAME 'C' // :['C', 'U', 'V', 'W']
+  #define AXIS6_ROTATES
 #endif
 
 // @section extruder
@@ -371,8 +393,12 @@
   //#define PS_OFF_SOUND            // Beep 1s when power off
   #define PSU_ACTIVE_STATE LOW      // Set 'LOW' for ATX, 'HIGH' for X-Box
 
-  //#define PSU_DEFAULT_OFF         // Keep power off until enabled directly with M80
-  //#define PSU_POWERUP_DELAY 250   // (ms) Delay for the PSU to warm up to full power
+  //#define PSU_DEFAULT_OFF               // Keep power off until enabled directly with M80
+  //#define PSU_POWERUP_DELAY      250    // (ms) Delay for the PSU to warm up to full power
+  //#define LED_POWEROFF_TIMEOUT 10000    // (ms) Turn off LEDs after power-off, with this amount of delay
+
+  //#define POWER_OFF_TIMER               // Enable M81 D<seconds> to power off after a delay
+  //#define POWER_OFF_WAIT_FOR_COOLDOWN   // Enable M81 S to power off only after cooldown
 
   //#define POWER_OFF_TIMER               // Enable M81 D<seconds> to power off after a delay
   //#define POWER_OFF_WAIT_FOR_COOLDOWN   // Enable M81 S to power off only after cooldown
@@ -436,6 +462,9 @@
  *     5 : 100kΩ  ATC Semitec 104GT-2/104NT-4-R025H42G - Used in ParCan, J-Head, and E3D, SliceEngineering 300°C
  *   501 : 100kΩ  Zonestar - Tronxy X3A
  *   502 : 100kΩ  Zonestar - used by hot bed in Zonestar Průša P802M
+ *   503 : 100kΩ  Zonestar (Z8XM2) Heated Bed thermistor
+ *   504 : 100kΩ  Zonestar P802QR2 (Part# QWG-104F-B3950) Hotend Thermistor
+ *   505 : 100kΩ  Zonestar P802QR2 (Part# QWG-104F-3950) Bed Thermistor
  *   512 : 100kΩ  RPW-Ultra hotend
  *     6 : 100kΩ  EPCOS - Not as accurate as table #1 (created using a fluke thermocouple)
  *     7 : 100kΩ  Honeywell 135-104LAG-J01
@@ -455,6 +484,7 @@
  *    61 : 100kΩ  Formbot/Vivedino 350°C Thermistor - beta 3950
  *    66 : 4.7MΩ  Dyze Design High Temperature Thermistor
  *    67 : 500kΩ  SliceEngineering 450°C Thermistor
+ *    68 : PT100 amplifier board from Dyze Design
  *    70 : 100kΩ  bq Hephestos 2
  *    75 : 100kΩ  Generic Silicon Heat Pad with NTC100K MGB18-104F39050L32
  *  2000 : 100kΩ  Ultimachine Rambo TDK NTCG104LH104KT1 NTC100K motherboard Thermistor
@@ -584,19 +614,19 @@
 //===========================================================================
 //============================= PID Settings ================================
 //===========================================================================
-// PID Tuning Guide here: https://reprap.org/wiki/PID_Tuning
 
-// Comment the following line to disable PID and enable bang-bang.
-#define PIDTEMP
+// Enable PIDTEMP for PID control or MPCTEMP for Predictive Model.
+// temperature control. Disable both for bang-bang heating.
+#define PIDTEMP          // See the PID Tuning Guide at https://reprap.org/wiki/PID_Tuning
+//#define MPCTEMP        // ** EXPERIMENTAL **
+
 #define BANG_MAX 255     // Limits current to nozzle while in bang-bang mode; 255=full current
 #define PID_MAX BANG_MAX // Limits current to nozzle while PID is active (see PID_FUNCTIONAL_RANGE below); 255=full current
 #define PID_K1 0.95      // Smoothing factor within any PID loop
 
 #if ENABLED(PIDTEMP)
-  #define PID_EDIT_MENU           // Add PID editing to the "Advanced Settings" menu. (~700 bytes of PROGMEM)
-  #define PID_AUTOTUNE_MENU       // Add PID auto-tuning to the "Advanced Settings" menu. (~250 bytes of PROGMEM)
   //#define PID_PARAMS_PER_HOTEND // Uses separate PID parameters for each extruder (useful for mismatched extruders)
-                                  // Set/get with gcode: M301 E[extruder number, 0-2]
+                                  // Set/get with G-code: M301 E[extruder number, 0-2]
 
   // Creality Ender-3
   #if ENABLED(PID_PARAMS_PER_HOTEND)
@@ -610,7 +640,49 @@
     #define DEFAULT_Ki   1.54
     #define DEFAULT_Kd  76.55
   #endif
-#endif // PIDTEMP
+#endif
+
+/**
+ * Model Predictive Control for hotend
+ *
+ * Use a physical model of the hotend to control temperature. When configured correctly
+ * this gives better responsiveness and stability than PID and it also removes the need
+ * for PID_EXTRUSION_SCALING and PID_FAN_SCALING. Use M306 to autotune the model.
+ */
+#if ENABLED(MPCTEMP)
+  //#define MPC_EDIT_MENU                             // Add MPC editing to the "Advanced Settings" menu. (~1300 bytes of flash)
+  //#define MPC_AUTOTUNE_MENU                         // Add MPC auto-tuning to the "Advanced Settings" menu. (~350 bytes of flash)
+
+  #define MPC_MAX BANG_MAX                            // (0..255) Current to nozzle while MPC is active.
+  #define MPC_HEATER_POWER { 40.0f }                  // (W) Heat cartridge powers.
+
+  #define MPC_INCLUDE_FAN                             // Model the fan speed?
+
+  // Measured physical constants from M306
+  #define MPC_BLOCK_HEAT_CAPACITY { 16.7f }           // (J/K) Heat block heat capacities.
+  #define MPC_SENSOR_RESPONSIVENESS { 0.22f }         // (K/s per ∆K) Rate of change of sensor temperature from heat block.
+  #define MPC_AMBIENT_XFER_COEFF { 0.068f }           // (W/K) Heat transfer coefficients from heat block to room air with fan off.
+  #if ENABLED(MPC_INCLUDE_FAN)
+    #define MPC_AMBIENT_XFER_COEFF_FAN255 { 0.097f }  // (W/K) Heat transfer coefficients from heat block to room air with fan on full.
+  #endif
+
+  // For one fan and multiple hotends MPC needs to know how to apply the fan cooling effect.
+  #if ENABLED(MPC_INCLUDE_FAN)
+    //#define MPC_FAN_0_ALL_HOTENDS
+    //#define MPC_FAN_0_ACTIVE_HOTEND
+  #endif
+
+  #define FILAMENT_HEAT_CAPACITY_PERMM { 5.6e-3f }    // 0.0056 J/K/mm for 1.75mm PLA (0.0149 J/K/mm for 2.85mm PLA).
+  //#define FILAMENT_HEAT_CAPACITY_PERMM { 3.6e-3f }  // 0.0036 J/K/mm for 1.75mm PETG (0.0094 J/K/mm for 2.85mm PETG).
+
+  // Advanced options
+  #define MPC_SMOOTHING_FACTOR 0.5f                   // (0.0...1.0) Noisy temperature sensors may need a lower value for stabilization.
+  #define MPC_MIN_AMBIENT_CHANGE 1.0f                 // (K/s) Modeled ambient temperature rate of change, when correcting model inaccuracies.
+  #define MPC_STEADYSTATE 0.5f                        // (K/s) Temperature change rate for steady state logic to be enforced.
+
+  #define MPC_TUNING_POS { X_CENTER, Y_CENTER, 1.0f } // (mm) M306 Autotuning position, ideally bed center at first layer height.
+  #define MPC_TUNING_END_Z 10.0f                      // (mm) M306 Autotuning final Z position.
+#endif
 
 //===========================================================================
 //====================== PID > Bed Temperature Control ======================
@@ -704,6 +776,9 @@
   //#define SLOW_PWM_HEATERS      // PWM with very low frequency (roughly 0.125Hz=8s) and minimum state time of approximately 1s useful for heaters driven by a relay
   #define PID_FUNCTIONAL_RANGE 10 // If the temperature difference between the target temperature and the actual temperature
                                   // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
+
+  //#define PID_EDIT_MENU         // Add PID editing to the "Advanced Settings" menu. (~700 bytes of flash)
+  //#define PID_AUTOTUNE_MENU     // Add PID auto-tuning to the "Advanced Settings" menu. (~250 bytes of flash)
 #endif
 
 // @section extruder
@@ -848,44 +923,6 @@
 #define J_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define K_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING false // Set to true to invert the logic of the probe.
-
-/**
- * Stepper Drivers
- *
- * These settings allow Marlin to tune stepper driver timing and enable advanced options for
- * stepper drivers that support them. You may also override timing options in Configuration_adv.h.
- *
- * A4988 is assumed for unspecified drivers.
- *
- * Use TMC2208/TMC2208_STANDALONE for TMC2225 drivers and TMC2209/TMC2209_STANDALONE for TMC2226 drivers.
- *
- * Options: A4988, A5984, DRV8825, LV8729, L6470, L6474, POWERSTEP01,
- *          TB6560, TB6600, TMC2100,
- *          TMC2130, TMC2130_STANDALONE, TMC2160, TMC2160_STANDALONE,
- *          TMC2208, TMC2208_STANDALONE, TMC2209, TMC2209_STANDALONE,
- *          TMC26X,  TMC26X_STANDALONE,  TMC2660, TMC2660_STANDALONE,
- *          TMC5130, TMC5130_STANDALONE, TMC5160, TMC5160_STANDALONE
- * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'L6470', 'L6474', 'POWERSTEP01', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2160', 'TMC2160_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC2209', 'TMC2209_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE', 'TMC5160', 'TMC5160_STANDALONE']
- */
-#define X_DRIVER_TYPE  TMC2208_STANDALONE
-#define Y_DRIVER_TYPE  TMC2208_STANDALONE
-#define Z_DRIVER_TYPE  TMC2208_STANDALONE
-//#define X2_DRIVER_TYPE A4988
-//#define Y2_DRIVER_TYPE A4988
-//#define Z2_DRIVER_TYPE A4988
-//#define Z3_DRIVER_TYPE A4988
-//#define Z4_DRIVER_TYPE A4988
-//#define I_DRIVER_TYPE  A4988
-//#define J_DRIVER_TYPE  A4988
-//#define K_DRIVER_TYPE  A4988
-#define E0_DRIVER_TYPE TMC2208_STANDALONE
-//#define E1_DRIVER_TYPE A4988
-//#define E2_DRIVER_TYPE A4988
-//#define E3_DRIVER_TYPE A4988
-//#define E4_DRIVER_TYPE A4988
-//#define E5_DRIVER_TYPE A4988
-//#define E6_DRIVER_TYPE A4988
-//#define E7_DRIVER_TYPE A4988
 
 // Enable this feature if all enabled endstop pins are interrupt-capable.
 // This will remove the need to poll the interrupt pins, saving many CPU cycles.
@@ -1094,6 +1131,17 @@
  * The BLTouch probe uses a Hall effect sensor and emulates a servo.
  */
 #define BLTOUCH
+
+/**
+ * MagLev V4 probe by MDD
+ *
+ * This probe is deployed and activated by powering a built-in electromagnet.
+ */
+//#define MAGLEV4
+#if ENABLED(MAGLEV4)
+  //#define MAGLEV_TRIGGER_PIN 11     // Set to the connected digital output
+  #define MAGLEV_TRIGGER_DELAY 15     // Changing this risks overheating the coil
+#endif
 
 /**
  * MagLev V4 probe by MDD
@@ -1702,18 +1750,18 @@
 #endif
 
 // Add a menu item to move between bed corners for manual bed adjustment
-//#define LEVEL_BED_CORNERS
+//#define LCD_BED_TRAMMING
 
-#if ENABLED(LEVEL_BED_CORNERS)
-  #define LEVEL_CORNERS_INSET_LFRB { 30, 30, 30, 30 } // (mm) Left, Front, Right, Back insets
-  #define LEVEL_CORNERS_HEIGHT      0.0   // (mm) Z height of nozzle at leveling points
-  #define LEVEL_CORNERS_Z_HOP       4.0   // (mm) Z height of nozzle between leveling points
-  //#define LEVEL_CENTER_TOO              // Move to the center after the last corner
-  #define LEVEL_CORNERS_USE_PROBE
-  #if ENABLED(LEVEL_CORNERS_USE_PROBE)
-    #define LEVEL_CORNERS_PROBE_TOLERANCE 0.1
-    #define LEVEL_CORNERS_VERIFY_RAISED   // After adjustment triggers the probe, re-probe to verify
-    //#define LEVEL_CORNERS_AUDIO_FEEDBACK
+#if ENABLED(LCD_BED_TRAMMING)
+  #define BED_TRAMMING_INSET_LFRB { 30, 30, 30, 30 }  // (mm) Left, Front, Right, Back insets
+  #define BED_TRAMMING_HEIGHT      0.0        // (mm) Z height of nozzle at leveling points
+  #define BED_TRAMMING_Z_HOP       4.0        // (mm) Z height of nozzle between leveling points
+  //#define BED_TRAMMING_INCLUDE_CENTER       // Move to the center after the last corner
+  #define BED_TRAMMING_USE_PROBE
+  #if ENABLED(BED_TRAMMING_USE_PROBE)
+    #define BED_TRAMMING_PROBE_TOLERANCE 0.1  // (mm)
+    #define BED_TRAMMING_VERIFY_RAISED        // After adjustment triggers the probe, re-probe to verify
+    //#define BED_TRAMMING_AUDIO_FEEDBACK
   #endif
 
   /**
@@ -1733,7 +1781,7 @@
    *  |  1       2  |   | 1         4 |    | 1         2 |   | 2           |
    *  LF --------- RF   LF --------- RF    LF --------- RF   LF --------- RF
    */
-  #define LEVEL_CORNERS_LEVELING_ORDER { LF, RF, RB, LB }
+  #define BED_TRAMMING_LEVELING_ORDER { LF, RF, RB, LB }
 #endif
 
 /**
@@ -1848,8 +1896,8 @@
  *   M501 - Read settings from EEPROM. (i.e., Throw away unsaved changes)
  *   M502 - Revert settings to "factory" defaults. (Follow with M500 to init the EEPROM.)
  */
-#define EEPROM_SETTINGS       // Persistent storage with M500 and M501
-//#define DISABLE_M503        // Saves ~2700 bytes of PROGMEM. Disable for release!
+#define EEPROM_SETTINGS     // Persistent storage with M500 and M501
+//#define DISABLE_M503        // Saves ~2700 bytes of flash. Disable for release!
 #define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save PROGMEM.
 #define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
 #if ENABLED(EEPROM_SETTINGS)
@@ -1880,7 +1928,7 @@
 // @section temperature
 
 //
-// Preheat Constants - Up to 5 are supported without changes
+// Preheat Constants - Up to 6 are supported without changes
 //
 #define PREHEAT_1_LABEL       "PLA"
 #define PREHEAT_1_TEMP_HOTEND 185
@@ -1910,8 +1958,7 @@
 #if ENABLED(NOZZLE_PARK_FEATURE)
   // Specify a park position as { X, Y, Z_raise }
   #define NOZZLE_PARK_POINT { (X_MIN_POS + 10), (Y_MAX_POS - 10), 20 }
-  //#define NOZZLE_PARK_X_ONLY          // X move only is required to park
-  //#define NOZZLE_PARK_Y_ONLY          // Y move only is required to park
+  #define NOZZLE_PARK_MOVE          0   // Park motion: 0 = XY Move, 1 = X Only, 2 = Y Only, 3 = X before Y, 4 = Y before X
   #define NOZZLE_PARK_Z_RAISE_MIN   2   // (mm) Always raise Z by at least this distance
   #define NOZZLE_PARK_XY_FEEDRATE 100   // (mm/s) X and Y axes feedrate (also used for delta Z axis)
   #define NOZZLE_PARK_Z_FEEDRATE    5   // (mm/s) Z axis feedrate (not used for delta printers)
@@ -2584,38 +2631,38 @@
 //========================== Extensible UI Displays ===========================
 //=============================================================================
 
-//
-// DGUS Touch Display with DWIN OS. (Choose one.)
-// ORIGIN : https://www.aliexpress.com/item/32993409517.html
-// FYSETC : https://www.aliexpress.com/item/32961471929.html
-// MKS    : https://www.aliexpress.com/item/1005002008179262.html
-//
-// Flash display with DGUS Displays for Marlin:
-//  - Format the SD card to FAT32 with an allocation size of 4kb.
-//  - Download files as specified for your type of display.
-//  - Plug the microSD card into the back of the display.
-//  - Boot the display and wait for the update to complete.
-//
-// ORIGIN (Marlin DWIN_SET)
-//  - Download https://github.com/coldtobi/Marlin_DGUS_Resources
-//  - Copy the downloaded DWIN_SET folder to the SD card.
-//
-// FYSETC (Supplier default)
-//  - Download https://github.com/FYSETC/FYSTLCD-2.0
-//  - Copy the downloaded SCREEN folder to the SD card.
-//
-// HIPRECY (Supplier default)
-//  - Download https://github.com/HiPrecy/Touch-Lcd-LEO
-//  - Copy the downloaded DWIN_SET folder to the SD card.
-//
-// MKS (MKS-H43) (Supplier default)
-//  - Download https://github.com/makerbase-mks/MKS-H43
-//  - Copy the downloaded DWIN_SET folder to the SD card.
-//
-// RELOADED (T5UID1)
-//  - Download https://github.com/Desuuuu/DGUS-reloaded/releases
-//  - Copy the downloaded DWIN_SET folder to the SD card.
-//
+/**
+ * DGUS Touch Display with DWIN OS. (Choose one.)
+ * ORIGIN : https://www.aliexpress.com/item/32993409517.html
+ * FYSETC : https://www.aliexpress.com/item/32961471929.html
+ * MKS    : https://www.aliexpress.com/item/1005002008179262.html
+ *
+ * Flash display with DGUS Displays for Marlin:
+ *  - Format the SD card to FAT32 with an allocation size of 4kb.
+ *  - Download files as specified for your type of display.
+ *  - Plug the microSD card into the back of the display.
+ *  - Boot the display and wait for the update to complete.
+ *
+ * ORIGIN (Marlin DWIN_SET)
+ *  - Download https://github.com/coldtobi/Marlin_DGUS_Resources
+ *  - Copy the downloaded DWIN_SET folder to the SD card.
+ *
+ * FYSETC (Supplier default)
+ *  - Download https://github.com/FYSETC/FYSTLCD-2.0
+ *  - Copy the downloaded SCREEN folder to the SD card.
+ *
+ * HIPRECY (Supplier default)
+ *  - Download https://github.com/HiPrecy/Touch-Lcd-LEO
+ *  - Copy the downloaded DWIN_SET folder to the SD card.
+ *
+ * MKS (MKS-H43) (Supplier default)
+ *  - Download https://github.com/makerbase-mks/MKS-H43
+ *  - Copy the downloaded DWIN_SET folder to the SD card.
+ *
+ * RELOADED (T5UID1)
+ *  - Download https://github.com/Desuuuu/DGUS-reloaded/releases
+ *  - Copy the downloaded DWIN_SET folder to the SD card.
+ */
 //#define DGUS_LCD_UI_ORIGIN
 //#define DGUS_LCD_UI_FYSETC
 //#define DGUS_LCD_UI_HIPRECY
@@ -2634,9 +2681,6 @@
 // Touch-screen LCD for Malyan M200/M300 printers
 //
 //#define MALYAN_LCD
-#if ENABLED(MALYAN_LCD)
-  #define LCD_SERIAL_PORT 1  // Default is 1 for Malyan M200
-#endif
 
 //
 // Touch UI for FTDI EVE (FT800/FT810) displays
@@ -2650,7 +2694,6 @@
 //#define ANYCUBIC_LCD_I3MEGA
 //#define ANYCUBIC_LCD_CHIRON
 #if EITHER(ANYCUBIC_LCD_I3MEGA, ANYCUBIC_LCD_CHIRON)
-  #define LCD_SERIAL_PORT 3  // Default is 3 for Anycubic
   //#define ANYCUBIC_LCD_DEBUG
 #endif
 
@@ -2658,9 +2701,6 @@
 // 320x240 Nextion 2.8" serial TFT Resistive Touch Screen NX3224T028
 //
 //#define NEXTION_TFT
-#if ENABLED(NEXTION_TFT)
-  #define LCD_SERIAL_PORT 1  // Default is 1 for Nextion
-#endif
 
 //
 // PanelDue touch controller by Escher3D
@@ -2818,7 +2858,7 @@
 // Ender-3 v2 OEM display. A DWIN display with Rotary Encoder.
 //
 //#define DWIN_CREALITY_LCD           // Creality UI
-//#define DWIN_CREALITY_LCD_ENHANCED  // Enhanced UI
+//#define DWIN_LCD_PROUI              // Pro UI by MRiscoC
 //#define DWIN_CREALITY_LCD_JYERSUI   // Jyers UI by Jacob Myers
 //#define DWIN_MARLINUI_PORTRAIT      // MarlinUI (portrait orientation)
 //#define DWIN_MARLINUI_LANDSCAPE     // MarlinUI (landscape orientation)
@@ -2831,7 +2871,7 @@
   #define BUTTON_DELAY_EDIT  50 // (ms) Button repeat delay for edit screens
   #define BUTTON_DELAY_MENU 250 // (ms) Button repeat delay for menus
 
-  //#define TOUCH_IDLE_SLEEP 300 // (secs) Turn off the TFT backlight if set (5mn)
+  //#define TOUCH_IDLE_SLEEP 300 // (s) Turn off the TFT backlight if set (5mn)
 
   #define TOUCH_SCREEN_CALIBRATION
 
@@ -2941,30 +2981,31 @@
 // Support for Adafruit NeoPixel LED driver
 //#define NEOPIXEL_LED
 #if ENABLED(NEOPIXEL_LED)
-  #define NEOPIXEL_TYPE   NEO_GRBW // NEO_GRBW / NEO_GRB - four/three channel driver type (defined in Adafruit_NeoPixel.h)
-  //#define NEOPIXEL_PIN     4     // LED driving pin
-  //#define NEOPIXEL2_TYPE NEOPIXEL_TYPE
-  //#define NEOPIXEL2_PIN    5
-  #define NEOPIXEL_PIXELS 30       // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)
-  #define NEOPIXEL_IS_SEQUENTIAL   // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
-  #define NEOPIXEL_BRIGHTNESS 127  // Initial brightness (0-255)
-  //#define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
+  #define NEOPIXEL_TYPE          NEO_GRBW // NEO_GRBW, NEO_RGBW, NEO_GRB, NEO_RBG, etc.
+                                          // See https://github.com/adafruit/Adafruit_NeoPixel/blob/master/Adafruit_NeoPixel.h
+  //#define NEOPIXEL_PIN                4 // LED driving pin
+  //#define NEOPIXEL2_TYPE  NEOPIXEL_TYPE
+  //#define NEOPIXEL2_PIN               5
+  #define NEOPIXEL_PIXELS              30 // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.)
+  #define NEOPIXEL_IS_SEQUENTIAL          // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
+  #define NEOPIXEL_BRIGHTNESS         127 // Initial brightness (0-255)
+  //#define NEOPIXEL_STARTUP_TEST         // Cycle through colors at startup
 
   // Support for second Adafruit NeoPixel LED driver controlled with M150 S1 ...
   //#define NEOPIXEL2_SEPARATE
   #if ENABLED(NEOPIXEL2_SEPARATE)
-    #define NEOPIXEL2_PIXELS      15  // Number of LEDs in the second strip
-    #define NEOPIXEL2_BRIGHTNESS 127  // Initial brightness (0-255)
-    #define NEOPIXEL2_STARTUP_TEST    // Cycle through colors at startup
+    #define NEOPIXEL2_PIXELS           15 // Number of LEDs in the second strip
+    #define NEOPIXEL2_BRIGHTNESS      127 // Initial brightness (0-255)
+    #define NEOPIXEL2_STARTUP_TEST        // Cycle through colors at startup
   #else
-    //#define NEOPIXEL2_INSERIES      // Default behavior is NeoPixel 2 in parallel
+    //#define NEOPIXEL2_INSERIES          // Default behavior is NeoPixel 2 in parallel
   #endif
 
   // Use some of the NeoPixel LEDs for static (background) lighting
-  //#define NEOPIXEL_BKGD_INDEX_FIRST  0              // Index of the first background LED
-  //#define NEOPIXEL_BKGD_INDEX_LAST   5              // Index of the last background LED
+  //#define NEOPIXEL_BKGD_INDEX_FIRST   0 // Index of the first background LED
+  //#define NEOPIXEL_BKGD_INDEX_LAST    5 // Index of the last background LED
   //#define NEOPIXEL_BKGD_COLOR { 255, 255, 255, 0 }  // R, G, B, W
-  //#define NEOPIXEL_BKGD_ALWAYS_ON                   // Keep the backlight on when other NeoPixels are off
+  //#define NEOPIXEL_BKGD_ALWAYS_ON       // Keep the backlight on when other NeoPixels are off
 #endif
 
 /**
