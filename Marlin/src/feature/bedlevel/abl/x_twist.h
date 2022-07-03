@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2021 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -21,40 +21,17 @@
  */
 #pragma once
 
-//
-// Prefix header for all Marlin sources
-//
+#include "../../../inc/MarlinConfigPre.h"
 
-#include "MarlinConfigPre.h"
+typedef float xatc_array_t[XATC_MAX_POINTS];
 
-#ifndef __MARLIN_DEPS__
-  #include "../HAL/HAL.h"
-  extern MarlinHAL hal;
-#endif
+class XATC {
+public:
+  static float spacing, start;
+  static xatc_array_t z_offset;
 
-#include "../pins/pins.h"
+  static float compensation(const xy_pos_t &raw);
+  static void print_points();
+};
 
-#ifndef __MARLIN_DEPS__
-  #include HAL_PATH(../HAL, timers.h)
-  #include HAL_PATH(../HAL, spi_pins.h)
-#endif
-
-#include "Conditionals_post.h"
-
-#ifndef __MARLIN_DEPS__
-
-  #include HAL_PATH(../HAL, inc/Conditionals_post.h)
-
-  #include "../core/types.h"  // Ahead of sanity-checks
-
-  #include "SanityCheck.h"
-  #include HAL_PATH(../HAL, inc/SanityCheck.h)
-
-  // Include all core headers
-  #include "../core/language.h"
-  #include "../core/utility.h"
-  #include "../core/serial.h"
-
-#endif
-
-#include "../core/multi_language.h"
+extern XATC xatc;

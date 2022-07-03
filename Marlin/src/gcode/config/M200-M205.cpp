@@ -134,9 +134,9 @@ void GcodeSuite::M201() {
   #endif
 
   LOOP_LOGICAL_AXES(i) {
-    if (parser.seenval(axis_codes[i])) {
-      const uint8_t a = TERN(HAS_EXTRUDERS, (i == E_AXIS ? uint8_t(E_AXIS_N(target_extruder)) : i), i);
-      planner.set_max_acceleration(a, parser.value_axis_units((AxisEnum)a));
+    if (parser.seenval(AXIS_CHAR(i))) {
+      const AxisEnum a = TERN(HAS_EXTRUDERS, (i == E_AXIS ? E_AXIS_N(target_extruder) : (AxisEnum)i), (AxisEnum)i);
+      planner.set_max_acceleration(a, parser.value_axis_units(a));
     }
   }
 }
@@ -180,9 +180,9 @@ void GcodeSuite::M203() {
   if (target_extruder < 0) return;
 
   LOOP_LOGICAL_AXES(i)
-    if (parser.seenval(axis_codes[i])) {
-      const uint8_t a = TERN(HAS_EXTRUDERS, (i == E_AXIS ? uint8_t(E_AXIS_N(target_extruder)) : i), i);
-      planner.set_max_feedrate(a, parser.value_axis_units((AxisEnum)a));
+    if (parser.seenval(AXIS_CHAR(i))) {
+      const AxisEnum a = TERN(HAS_EXTRUDERS, (i == E_AXIS ? E_AXIS_N(target_extruder) : (AxisEnum)i), (AxisEnum)i);
+      planner.set_max_feedrate(a, parser.value_axis_units(a));
     }
 }
 
@@ -204,6 +204,32 @@ void GcodeSuite::M203_report(const bool forReplay/*=true*/) {
   #if ENABLED(DISTINCT_E_FACTORS)
     LOOP_L_N(i, E_STEPPERS) {
       if (!forReplay) SERIAL_ECHO_START();
+      SERIAL_ECHOLNPGM_P(
+          PSTR("  M203 T"), i
+        , SP_E_STR, VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS_N(i)])
+      );
+    }
+  #endif
+}
+
+void GcodeSuite::M203_report(const bool forReplay/*=true*/) {
+  report_heading_etc(forReplay, F(STR_MAX_FEEDRATES));
+  SERIAL_ECHOLNPGM_P(
+    LIST_N(DOUBLE(LINEAR_AXES),
+      PSTR("  M203 X"), LINEAR_UNIT(planner.settings.max_feedrate_mm_s[X_AXIS]),
+      SP_Y_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Y_AXIS]),
+      SP_Z_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Z_AXIS]),
+      SP_I_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[I_AXIS]),
+      SP_J_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[J_AXIS]),
+      SP_K_STR, LINEAR_UNIT(planner.settings.max_feedrate_mm_s[K_AXIS])
+    )
+    #if HAS_EXTRUDERS && DISABLED(DISTINCT_E_FACTORS)
+      , SP_E_STR, VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS])
+    #endif
+  );
+  #if ENABLED(DISTINCT_E_FACTORS)
+    LOOP_L_N(i, E_STEPPERS) {
+      SERIAL_ECHO_START();
       SERIAL_ECHOLNPGM_P(
           PSTR("  M203 T"), i
         , SP_E_STR, VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS_N(i)])

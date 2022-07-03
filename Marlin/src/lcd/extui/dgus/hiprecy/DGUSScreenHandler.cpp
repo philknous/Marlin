@@ -85,7 +85,7 @@
 
       case 1: // Pause
 
-        GotoScreen(MKSLCD_SCREEN_PAUSE);
+        GotoScreen(DGUSLCD_SCREEN_SDPRINTMANIPULATION);
         if (!ExtUI::isPrintingFromMediaPaused()) {
           ExtUI::pausePrint();
           //ExtUI::mks_pausePrint();

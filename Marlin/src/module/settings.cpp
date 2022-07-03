@@ -270,6 +270,9 @@ typedef struct SettingsDataStruct {
   xy_pos_t bilinear_grid_spacing, bilinear_start;       // G29 L F
   #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
     bed_mesh_t z_values;                                // G29
+    #if ENABLED(X_AXIS_TWIST_COMPENSATION)
+      XATC xatc;                                        // TBD
+    #endif
   #else
     float z_values[3][3];
   #endif
@@ -544,6 +547,13 @@ typedef struct SettingsDataStruct {
   #endif
 
   //
+  // Fan tachometer check
+  //
+  #if HAS_FANCHECK
+    bool fan_check_enabled;
+  #endif
+
+  //
   // MKS UI controller
   //
   #if ENABLED(DGUS_LCD_UI_MKS)
@@ -584,7 +594,7 @@ void MarlinSettings::postprocess() {
   xyze_pos_t oldpos = current_position;
 
   // steps per s2 needs to be updated to agree with units per s2
-  planner.reset_acceleration_rates();
+  planner.refresh_acceleration_rates();
 
   // Make sure delta kinematics are updated before refreshing the
   // planner position so the stepper counts will be set correctly.
@@ -1561,6 +1571,13 @@ void MarlinSettings::postprocess() {
     #endif
 
     //
+    // Fan tachometer check
+    //
+    #if HAS_FANCHECK
+      EEPROM_WRITE(fan_check.enabled);
+    #endif
+
+    //
     // MKS UI controller
     //
     #if ENABLED(DGUS_LCD_UI_MKS)
@@ -2504,6 +2521,14 @@ void MarlinSettings::postprocess() {
       #if ENABLED(SOUND_MENU_ITEM)
         _FIELD_TEST(sound_on);
         EEPROM_READ(ui.sound_on);
+      #endif
+
+      //
+      // Fan tachometer check
+      //
+      #if HAS_FANCHECK
+        _FIELD_TEST(fan_check_enabled);
+        EEPROM_READ(fan_check.enabled);
       #endif
 
       //

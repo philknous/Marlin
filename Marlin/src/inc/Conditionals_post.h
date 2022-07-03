@@ -457,6 +457,28 @@
     #endif
   #endif
 
+  // Extender cable doesn't support SD_DETECT_PIN
+  #if ENABLED(NO_SD_DETECT)
+    #undef SD_DETECT_PIN
+  #endif
+
+  // Not onboard or custom cable
+  #if SD_CONNECTION_IS(LCD) || !defined(SDCARD_CONNECTION)
+    #define SD_CONNECTION_TYPICAL 1
+  #endif
+
+  // Set SD_DETECT_STATE based on hardware if not overridden
+  #if PIN_EXISTS(SD_DETECT)
+    #define HAS_SD_DETECT 1
+    #ifndef SD_DETECT_STATE
+      #if ALL(SD_CONNECTION_TYPICAL, HAS_MARLINUI_MENU, ELB_FULL_GRAPHIC_CONTROLLER)
+        #define SD_DETECT_STATE HIGH
+      #else
+        #define SD_DETECT_STATE LOW
+      #endif
+    #endif
+  #endif
+
   #if DISABLED(USB_FLASH_DRIVE_SUPPORT) || BOTH(MULTI_VOLUME, VOLUME_SD_ONBOARD)
     #if ENABLED(SDIO_SUPPORT)
       #define NEED_SD2CARD_SDIO 1

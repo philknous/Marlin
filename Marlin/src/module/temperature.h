@@ -647,6 +647,9 @@ class Temperature {
     #if HAS_TEMP_PROBE
       static celsius_float_t analog_to_celsius_probe(const raw_adc_t raw);
     #endif
+    #if HAS_TEMP_PROBE
+      static celsius_float_t analog_to_celsius_probe(const int16_t raw);
+    #endif
     #if HAS_TEMP_COOLER
       static celsius_float_t analog_to_celsius_cooler(const raw_adc_t raw);
     #endif
@@ -655,6 +658,12 @@ class Temperature {
     #endif
     #if HAS_TEMP_REDUNDANT
       static celsius_float_t analog_to_celsius_redundant(const raw_adc_t raw);
+    #endif
+    #if HAS_TEMP_BOARD
+      static celsius_float_t analog_to_celsius_board(const int16_t raw);
+    #endif
+    #if HAS_TEMP_REDUNDANT
+      static celsius_float_t analog_to_celsius_redundant(const int16_t raw);
     #endif
 
     #if HAS_FAN
@@ -995,7 +1004,7 @@ class Temperature {
     #endif // HEATER_IDLE_HANDLER
 
     #if HAS_TEMP_SENSOR
-      static void print_heater_states(const uint8_t target_extruder
+      static void print_heater_states(const int8_t target_extruder
         OPTARG(HAS_TEMP_REDUNDANT, const bool include_r=false)
       );
       #if ENABLED(AUTO_REPORT_TEMPERATURES)

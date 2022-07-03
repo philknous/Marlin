@@ -247,6 +247,9 @@ inline lcd_uint_t lcd_put_u8str(FSTR_P const ftpl, const int8_t ind, const char 
 inline lcd_uint_t lcd_put_u8str(const lcd_uint_t col, const lcd_uint_t row, FSTR_P const ftpl, const int8_t ind, const char *cstr=nullptr, FSTR_P const fstr=nullptr, const lcd_uint_t maxlen=LCD_WIDTH) {
   return lcd_put_u8str_P(col, row, FTOP(ftpl), ind, cstr, fstr, maxlen);
 }
+inline lcd_uint_t lcd_put_u8str_ind(const lcd_uint_t col, const lcd_uint_t row, FSTR_P const fstr, const int8_t ind, FSTR_P const inFstr=nullptr, const lcd_uint_t maxlen=LCD_WIDTH) {
+  return lcd_put_u8str_ind_P(col, row, FTOP(fstr), ind, FTOP(inFstr), maxlen);
+}
 
 /**
  * @brief Draw a SRAM string with no width limit

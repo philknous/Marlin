@@ -111,19 +111,10 @@ uint16_t MarlinHAL::adc_value() { return ADC0_RA; }
 // Free Memory Accessor
 // ------------------------
 
-extern "C" {
-  extern char __bss_end;
-  extern char __heap_start;
-  extern void* __brkval;
-
-  int freeMemory() {
-    int free_memory;
-    if ((int)__brkval == 0)
-      free_memory = ((int)&free_memory) - ((int)&__bss_end);
-    else
-      free_memory = ((int)&free_memory) - ((int)__brkval);
-    return free_memory;
-  }
+void MarlinHAL::adc_init() {
+  analog_init();
+  while (ADC0_SC3 & ADC_SC3_CAL) {}; // Wait for calibration to finish
+  NVIC_ENABLE_IRQ(IRQ_FTM1);
 }
 
 #endif // __MK20DX256__
