@@ -418,14 +418,6 @@ public:
   }
   static void say_units();
 
-  static void report_echo_start(const bool forReplay);
-  static void report_heading(const bool forReplay, FSTR_P const fstr, const bool eol=true);
-  static void report_heading_etc(const bool forReplay, FSTR_P const fstr, const bool eol=true) {
-    report_heading(forReplay, fstr, eol);
-    report_echo_start(forReplay);
-  }
-  static void say_units();
-
   static int8_t get_target_extruder_from_command();
   static int8_t get_target_e_stepper_from_command(const int8_t dval=-1);
   static void get_destination_from_command();
