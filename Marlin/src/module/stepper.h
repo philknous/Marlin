@@ -46,7 +46,7 @@
 #include "planner.h"
 #include "stepper/indirection.h"
 #ifdef __AVR__
-  #include "speed_lookuptable.h"
+  #include "stepper/speed_lookuptable.h"
 #endif
 
 // Disable multiple steps per ISR
@@ -250,9 +250,7 @@ typedef struct {
       #endif
     };
   };
-  constexpr ena_mask_t linear_bits() { return _BV(LINEAR_AXES) - 1; }
-  constexpr ena_mask_t e_bits() { return (_BV(EXTRUDERS) - 1) << LINEAR_AXES; }
-} axis_flags_t;
+} stepper_flags_t;
 
 // All the stepper enable pins
 constexpr pin_t ena_pins[] = {
@@ -336,7 +334,7 @@ class Stepper {
       static constexpr uint8_t last_moved_extruder = 0;
     #endif
 
-    #if HAS_FREEZE_PIN
+    #if ENABLED(FREEZE_FEATURE)
       static bool frozen;                   // Set this flag to instantly freeze motion
     #endif
 
@@ -357,9 +355,9 @@ class Stepper {
     #endif
     #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       static bool locked_Z_motor, locked_Z2_motor
-                  #if NUM_Z_STEPPER_DRIVERS >= 3
+                  #if NUM_Z_STEPPERS >= 3
                     , locked_Z3_motor
-                    #if NUM_Z_STEPPER_DRIVERS >= 4
+                    #if NUM_Z_STEPPERS >= 4
                       , locked_Z4_motor
                     #endif
                   #endif
@@ -513,8 +511,7 @@ class Stepper {
     // Discard current block and free any resources
     FORCE_INLINE static void discard_current_block() {
       #if ENABLED(DIRECT_STEPPING)
-        if (IS_PAGE(current_block))
-          page_manager.free_page(current_block->page_idx);
+        if (current_block->is_page()) page_manager.free_page(current_block->page_idx);
       #endif
       current_block = nullptr;
       axis_did_move = 0;
@@ -561,18 +558,18 @@ class Stepper {
     #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       FORCE_INLINE static void set_z1_lock(const bool state) { locked_Z_motor = state; }
       FORCE_INLINE static void set_z2_lock(const bool state) { locked_Z2_motor = state; }
-      #if NUM_Z_STEPPER_DRIVERS >= 3
+      #if NUM_Z_STEPPERS >= 3
         FORCE_INLINE static void set_z3_lock(const bool state) { locked_Z3_motor = state; }
-        #if NUM_Z_STEPPER_DRIVERS >= 4
+        #if NUM_Z_STEPPERS >= 4
           FORCE_INLINE static void set_z4_lock(const bool state) { locked_Z4_motor = state; }
         #endif
       #endif
       static void set_all_z_lock(const bool lock, const int8_t except=-1) {
         set_z1_lock(lock ^ (except == 0));
         set_z2_lock(lock ^ (except == 1));
-        #if NUM_Z_STEPPER_DRIVERS >= 3
+        #if NUM_Z_STEPPERS >= 3
           set_z3_lock(lock ^ (except == 2));
-          #if NUM_Z_STEPPER_DRIVERS >= 4
+          #if NUM_Z_STEPPERS >= 4
             set_z4_lock(lock ^ (except == 3));
           #endif
         #endif
@@ -587,7 +584,7 @@ class Stepper {
       static void refresh_motor_power();
     #endif
 
-    static axis_flags_t axis_enabled;   // Axis stepper(s) ENABLED states
+    static stepper_flags_t axis_enabled;  // Axis stepper(s) ENABLED states
 
     static bool axis_is_enabled(const AxisEnum axis E_OPTARG(const uint8_t eindex=0)) {
       return TEST(axis_enabled.bits, INDEX_OF_AXIS(axis, eindex));
